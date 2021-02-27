@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "employees-app"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1w4yrfwu8kkyp"
+s3_prefix = "employees-app"
+region = "eu-west-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"

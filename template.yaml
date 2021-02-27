@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: employees-app
+  
+Globals:
+  Function:
+    Timeout: 3
+    Environment:
+      Variables:
+        REGION: 'eu-west-1'
+
+Resources:
+  GetEmployeesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: api/
+      Handler: app.getEmployees
+      Runtime: nodejs12.x
+      Policies: AmazonDynamoDBReadOnlyAccess
+      Events:
+        GetEmployees:
+          Type: Api
+          Properties:
+            Path: /employees
+            Method: get
+  GetEmployeeByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: api/
+      Handler: app.getEmployeeById
+      Runtime: nodejs12.x
+      Policies: AmazonDynamoDBReadOnlyAccess
+      Events:
+        GetEmployeeById:
+          Type: Api
+          Properties:
+            Path: /employees/{id}
+            Method: get
+  UpdateEmployeeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: api/
+      Handler: app.updateEmployee
+      Runtime: nodejs12.x
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        updateEmployee:
+          Type: Api
+          Properties:
+            Path: /employees/{id}
+            Method: patch
+  DeleteEmployeeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: api/
+      Handler: app.deleteEmployee
+      Runtime: nodejs12.x
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        deleteEmployee:
+          Type: Api
+          Properties:
+            Path: /employees/{id}
+            Method: delete
+  CreateEmployeeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: api/
+      Handler: app.createEmployee
+      Runtime: nodejs12.x
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        createEmployee:
+          Type: Api
+          Properties:
+            Path: /employees
+            Method: post
+  SearchEmployeesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: api/
+      Handler: app.searchEmployees
+      Runtime: nodejs12.x
+      Policies: AmazonDynamoDBFullAccess
+      Events:
+        createEmployee:
+          Type: Api
+          Properties:
+            Path: /employees/search
+            Method: post
+  EmployeesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Employees
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: employeeName
+          AttributeType: S
+        - AttributeName: department
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: employeeName-index
+          KeySchema:
+            - AttributeName: employeeName
+              KeyType: HASH
+          Projection:
+            NonKeyAttributes:
+              - employeeName
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 1
+        - IndexName: department-index
+          KeySchema:
+            - AttributeName: department
+              KeyType: HASH
+          Projection:
+            NonKeyAttributes:
+              - department
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 1
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 1
+
+Outputs:
+  EmployeesTable:
+    Description: "Employees Table ARN"
+    Value: !GetAtt EmployeesTable.Arn
+  GetEmployeesFunction:
+    Description: "Get Employees Function ARN"
+    Value: !GetAtt GetEmployeesFunction.Arn
+  GetEmployeeByIdFunction:
+    Description: "Get Employee By Id Function ARN"
+    Value: !GetAtt GetEmployeeByIdFunction.Arn
+  UpdateEmployeeFunction:
+    Description: "Update Employee Function ARN"
+    Value: !GetAtt UpdateEmployeeFunction.Arn
+  DeleteEmployeeFunction:
+    Description: "Delete Employee Function ARN"
+    Value: !GetAtt DeleteEmployeeFunction.Arn
+  CreateEmployeeFunction:
+    Description: "Create Employee Function ARN"
+    Value: !GetAtt CreateEmployeeFunction.Arn
+  SearchEmployeesFunction:
+    Description: "Search Employees Function ARN"
+    Value: !GetAtt SearchEmployeesFunction.Arn
